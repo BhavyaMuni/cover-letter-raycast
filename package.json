@@ -5,6 +5,7 @@
   "description": "Generates cover letter and downloads it to folder specified.",
   "icon": "command-icon.png",
   "author": "bhavyamuni",
+  "owner": "bhavya-muni",
   "categories": [
     "Productivity",
     "Developer Tools"

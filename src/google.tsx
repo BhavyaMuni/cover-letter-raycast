@@ -4,7 +4,8 @@ import fetch from "node-fetch";
 // Create an OAuth client ID via https://console.developers.google.com/apis/credentials
 // As application type choose "iOS" (required for PKCE)
 // As Bundle ID enter: com.raycast
-const clientId = process.env.CLIENT_ID ?? "";
+const clientId =
+  "1038477001981-f8k6n1rqom4q37m0o7qmldvoh6sje23j.apps.googleusercontent.com";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.AppURI,
