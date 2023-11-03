@@ -4,8 +4,8 @@
   "title": "Cover Letter Generator",
   "description": "Generates cover letter and downloads it to folder specified.",
   "icon": "command-icon.png",
-  "author": "bhavyamuni",
-  "owner": "bhavya-muni",
+  "author": "bhavya_muni",
+  "owner": "bhavya_muni",
   "categories": [
     "Productivity",
     "Developer Tools"
