@@ -18,6 +18,8 @@ const client = new OAuth.PKCEClient({
 // Authorization
 
 export async function authorize(): Promise<void> {
+  require("dotenv").config();
+
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
@@ -80,7 +82,6 @@ async function refreshTokens(
 }
 
 // API
-
 export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   const params = new URLSearchParams();
   params.append("q", "trashed = false");
@@ -89,7 +90,7 @@ export async function fetchItems(): Promise<{ id: string; title: string }[]> {
     "files(id, name, mimeType, iconLink, modifiedTime, webViewLink, webContentLink, size)"
   );
   params.append("orderBy", "recency desc");
-  params.append("pageSize", "100");
+  params.append("pageSize", "1");
 
   const response = await fetch(
     "https://www.googleapis.com/drive/v3/files?" + params.toString(),
@@ -108,4 +109,48 @@ export async function fetchItems(): Promise<{ id: string; title: string }[]> {
     files: { id: string; name: string }[];
   };
   return json.files.map((item) => ({ id: item.id, title: item.name }));
+}
+
+async function getMasterId(): Promise<string> {
+  const params = new URLSearchParams();
+  params.append("q", "name = 'cover_letter_bhavya_muni_'");
+
+  params.append("fields", "files(id, name)");
+
+  params.append("orderBy", "recency desc");
+  params.append("pageSize", "100");
+  const response = await fetch(
+    "https://www.googleapis.com/drive/v3/files?" + params.toString(),
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      },
+    }
+  );
+
+  const json = (await response.json()) as {
+    files: { id: string; name: string }[];
+  };
+  const masterId = json.files[0].id;
+  return masterId;
+}
+export async function duplicateMaster() {
+  const masterId = await getMasterId();
+  //   console.log(fileId);
+  const response = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${masterId}/copy`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      },
+      body: { title: "Test" },
+    }
+  );
+  console.log(response);
+  const json = await response.json();
+  console.log(json);
+  // return json;
 }
