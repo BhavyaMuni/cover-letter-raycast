@@ -147,12 +147,11 @@ async function duplicateMaster(cname?: string) {
         Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
       body: JSON.stringify({
-        name: cname ?? "cover_letter_bhavya_muni_" + Date.now(),
+        name: cname + "_Bhavya_Muni_cover_letter",
       }),
     }
   );
   const json = (await response.json()) as { id: string; name: string };
-
   return json;
 }
 
@@ -185,7 +184,7 @@ export async function generateLetter(values: Values) {
   );
 
   const reponse = await fetch(
-    `https://docs.googleapis.com/v1/documents/${fileId}/batchUpdate`,
+    `https://docs.googleapis.com/v1/documents/${fileId.id}:batchUpdate`,
     {
       method: "POST",
       headers: {
@@ -200,7 +199,11 @@ export async function generateLetter(values: Values) {
                 text: "{{DATE}}",
                 matchCase: true,
               },
-              replaceText: values.date.toString(),
+              replaceText: new Date().toLocaleDateString("en-us", {
+                day: "2-digit",
+                year: "numeric",
+                month: "long",
+              }),
             },
           },
           {
@@ -252,6 +255,5 @@ export async function generateLetter(values: Values) {
       }),
     }
   );
-
   await downloadAsPdf(fileId);
 }
