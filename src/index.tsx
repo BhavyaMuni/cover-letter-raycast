@@ -9,13 +9,13 @@ import {
 import * as google from "./google";
 import { useEffect, useState } from "react";
 
-type Values = {
-  textfield: string;
-  textarea: string;
-  datepicker: Date;
-  checkbox: boolean;
-  dropdown: string;
-  tokeneditor: string[];
+export type Values = {
+  date: Date;
+  position: string;
+  company: string;
+  quality: string[];
+  tech: string;
+  field: string;
 };
 
 export default function Command() {
@@ -26,7 +26,6 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       try {
-        // await service.removeTokens();
         await service.authorize();
         const fetchedItems = await service.fetchItems();
         setItems(fetchedItems);
@@ -39,9 +38,9 @@ export default function Command() {
     })();
   }, [service]);
 
-  async function handleSubmit() {
-    service.duplicateMaster();
-    // console.log((await service.fetchItems()).length);
+  async function handleSubmit(values: Values) {
+    // service.generateLetter(values);
+    console.log(service.formatQualities(["a", "b", "c"]));
   }
 
   return (

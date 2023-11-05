@@ -1,5 +1,6 @@
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
+import { Values } from "./index";
 
 // Create an OAuth client ID via https://console.developers.google.com/apis/credentials
 // As application type choose "iOS" (required for PKCE)
@@ -16,10 +17,7 @@ const client = new OAuth.PKCEClient({
 });
 
 // Authorization
-
 export async function authorize(): Promise<void> {
-  require("dotenv").config();
-
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
@@ -32,7 +30,7 @@ export async function authorize(): Promise<void> {
     endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     clientId: clientId,
     scope:
-      "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/docs",
   });
   const { authorizationCode } = await client.authorize(authRequest);
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));
@@ -81,7 +79,6 @@ async function refreshTokens(
   return tokenResponse;
 }
 
-// API
 export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   const params = new URLSearchParams();
   params.append("q", "name = 'cover_letter_bhavya_muni_'");
@@ -137,9 +134,9 @@ async function getMasterId(): Promise<string> {
   const masterId = json.files[0].id;
   return masterId;
 }
-export async function duplicateMaster() {
+
+async function duplicateMaster() {
   const masterId = await getMasterId();
-  console.log(masterId);
   const response = await fetch(
     `https://www.googleapis.com/drive/v3/files/${masterId}/copy`,
     {
@@ -148,10 +145,90 @@ export async function duplicateMaster() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
-      body: JSON.stringify({ title: "Test" }),
+      body: JSON.stringify({ name: "Test" }),
     }
   );
-  const json = await response.json();
-  console.log(json.error.details);
-  // return json;
+  const json = (await response.json()) as { id: string; name: string };
+
+  return json;
+}
+
+export const formatQualities = (qs: string[]): string => {
+  let first = qs.join(", ").replace(/['()]/g, "");
+
+  let reversed = first.split("").reverse().join("");
+  let replaced = reversed.replace(",", " dna");
+  return replaced.split("").reverse().join("");
+};
+export async function generateLetter(values: Values) {
+  const fileId = await duplicateMaster();
+
+  const reponse = await fetch(
+    `https://docs.googleapis.com/v1/documents/${fileId}/batchUpdate`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      },
+      body: JSON.stringify({
+        requests: [
+          {
+            replaceAllText: {
+              containsText: {
+                text: "{{DATE}}",
+                matchCase: true,
+              },
+              replaceText: values.date,
+            },
+          },
+          {
+            replaceAllText: {
+              containsText: {
+                text: "{{POSITION}}",
+                matchCase: true,
+              },
+              replaceText: values.position,
+            },
+          },
+          {
+            replaceAllText: {
+              containsText: {
+                text: "{{COMPANY}}",
+                matchCase: true,
+              },
+              replaceText: values.company,
+            },
+          },
+          {
+            replaceAllText: {
+              containsText: {
+                text: "{{quality}}",
+                matchCase: true,
+              },
+              replaceText: values.quality,
+            },
+          },
+          {
+            replaceAllText: {
+              containsText: {
+                text: "{{quality}}",
+                matchCase: true,
+              },
+              replaceText: values.quality,
+            },
+          },
+          {
+            replaceAllText: {
+              containsText: {
+                text: "{{tech}}",
+                matchCase: true,
+              },
+              replaceText: values.tech,
+            },
+          },
+        ],
+      }),
+    }
+  );
 }
