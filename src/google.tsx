@@ -1,6 +1,7 @@
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 import { Values } from "./index";
+import fs from "fs";
 
 // Create an OAuth client ID via https://console.developers.google.com/apis/credentials
 // As application type choose "iOS" (required for PKCE)
@@ -135,7 +136,7 @@ async function getMasterId(): Promise<string> {
   return masterId;
 }
 
-async function duplicateMaster() {
+async function duplicateMaster(cname?: string) {
   const masterId = await getMasterId();
   const response = await fetch(
     `https://www.googleapis.com/drive/v3/files/${masterId}/copy`,
@@ -145,7 +146,9 @@ async function duplicateMaster() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
-      body: JSON.stringify({ name: "Test" }),
+      body: JSON.stringify({
+        name: cname ?? "cover_letter_bhavya_muni_" + Date.now(),
+      }),
     }
   );
   const json = (await response.json()) as { id: string; name: string };
@@ -153,15 +156,33 @@ async function duplicateMaster() {
   return json;
 }
 
-export const formatQualities = (qs: string[]): string => {
+const formatQualities = (qs: string[]): string => {
   let first = qs.join(", ").replace(/['()]/g, "");
 
   let reversed = first.split("").reverse().join("");
-  let replaced = reversed.replace(",", " dna");
+  let replaced = reversed.replace(",", "dna ");
   return replaced.split("").reverse().join("");
 };
+
+async function downloadAsPdf(fileId: { id: string; name: string }) {
+  // download file id as pdf
+  const response = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId.id}/export?` +
+      new URLSearchParams({ mimeType: "application/pdf" }).toString(),
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      },
+    }
+  );
+  await response.body?.pipe(fs.createWriteStream("/tmp/cover_letter.pdf"));
+}
+
 export async function generateLetter(values: Values) {
-  const fileId = await duplicateMaster();
+  const fileId = await duplicateMaster(
+    values.company.toLowerCase().replaceAll(" ", "_")
+  );
 
   const reponse = await fetch(
     `https://docs.googleapis.com/v1/documents/${fileId}/batchUpdate`,
@@ -179,7 +200,7 @@ export async function generateLetter(values: Values) {
                 text: "{{DATE}}",
                 matchCase: true,
               },
-              replaceText: values.date,
+              replaceText: values.date.toString(),
             },
           },
           {
@@ -203,32 +224,34 @@ export async function generateLetter(values: Values) {
           {
             replaceAllText: {
               containsText: {
-                text: "{{quality}}",
+                text: "{{QUALITY}}",
                 matchCase: true,
               },
-              replaceText: values.quality,
+              replaceText: formatQualities(values.quality),
             },
           },
           {
             replaceAllText: {
               containsText: {
-                text: "{{quality}}",
-                matchCase: true,
-              },
-              replaceText: values.quality,
-            },
-          },
-          {
-            replaceAllText: {
-              containsText: {
-                text: "{{tech}}",
+                text: "{{TECH}}",
                 matchCase: true,
               },
               replaceText: values.tech,
+            },
+          },
+          {
+            replaceAllText: {
+              containsText: {
+                text: "{{FIELD}}",
+                matchCase: true,
+              },
+              replaceText: values.field,
             },
           },
         ],
       }),
     }
   );
+
+  await downloadAsPdf(fileId);
 }

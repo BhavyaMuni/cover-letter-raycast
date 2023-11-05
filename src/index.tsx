@@ -39,8 +39,7 @@ export default function Command() {
   }, [service]);
 
   async function handleSubmit(values: Values) {
-    // service.generateLetter(values);
-    console.log(service.formatQualities(["a", "b", "c"]));
+    service.generateLetter(values);
   }
 
   return (
