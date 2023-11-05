@@ -84,14 +84,12 @@ async function refreshTokens(
 // API
 export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   const params = new URLSearchParams();
-  params.append("q", "trashed = false");
-  params.append(
-    "fields",
-    "files(id, name, mimeType, iconLink, modifiedTime, webViewLink, webContentLink, size)"
-  );
+  params.append("q", "name = 'cover_letter_bhavya_muni_'");
+
+  params.append("fields", "files(id, name)");
+
   params.append("orderBy", "recency desc");
   params.append("pageSize", "1");
-
   const response = await fetch(
     "https://www.googleapis.com/drive/v3/files?" + params.toString(),
     {
@@ -111,6 +109,10 @@ export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   return json.files.map((item) => ({ id: item.id, title: item.name }));
 }
 
+export async function removeTokens(): Promise<void> {
+  await client.removeTokens();
+}
+
 async function getMasterId(): Promise<string> {
   const params = new URLSearchParams();
   params.append("q", "name = 'cover_letter_bhavya_muni_'");
@@ -118,7 +120,7 @@ async function getMasterId(): Promise<string> {
   params.append("fields", "files(id, name)");
 
   params.append("orderBy", "recency desc");
-  params.append("pageSize", "100");
+  params.append("pageSize", "1");
   const response = await fetch(
     "https://www.googleapis.com/drive/v3/files?" + params.toString(),
     {
@@ -137,7 +139,7 @@ async function getMasterId(): Promise<string> {
 }
 export async function duplicateMaster() {
   const masterId = await getMasterId();
-  //   console.log(fileId);
+  console.log(masterId);
   const response = await fetch(
     `https://www.googleapis.com/drive/v3/files/${masterId}/copy`,
     {
@@ -146,11 +148,10 @@ export async function duplicateMaster() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
-      body: { title: "Test" },
+      body: JSON.stringify({ title: "Test" }),
     }
   );
-  console.log(response);
   const json = await response.json();
-  console.log(json);
+  console.log(json.error.details);
   // return json;
 }
