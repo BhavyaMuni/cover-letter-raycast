@@ -41,6 +41,11 @@ export default function Command() {
     await service.generateLetter(values);
     showToast({ style: Toast.Style.Success, title: "✅" });
     setIsLoading(false);
+    await runAppleScript(`
+    tell application "Finder"
+        activate
+        open ("/Users/bhavya/Documents/CoOp/" as POSIX file)
+    end tell`);
     await showHUD("Done ✅", {
       clearRootSearch: true,
       popToRootType: PopToRootType.Immediate,
@@ -129,13 +134,6 @@ export default function Command() {
     // </List>
   );
 }
-
-function GenerateLetterAction(props: { onSubmit: () => void }) {
-  return (
-    <Action
-      title="Duplicate Master"
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
-      onAction={props.onSubmit}
-    />
-  );
+function runAppleScript(arg0: string) {
+  throw new Error("Function not implemented.");
 }

@@ -163,7 +163,10 @@ const formatQualities = (qs: string[]): string => {
   return replaced.split("").reverse().join("");
 };
 
-async function downloadAsPdf(fileId: { id: string; name: string }) {
+async function downloadAsPdf(
+  fileId: { id: string; name: string },
+  cname?: string
+) {
   // download file id as pdf
   const response = await fetch(
     `https://www.googleapis.com/drive/v3/files/${fileId.id}/export?` +
@@ -175,13 +178,15 @@ async function downloadAsPdf(fileId: { id: string; name: string }) {
       },
     }
   );
-  await response.body?.pipe(fs.createWriteStream("/tmp/cover_letter.pdf"));
+  response.body?.pipe(
+    fs.createWriteStream(
+      `/Users/bhavya/Documents/CoOp/${cname ?? ""}_Bhavya_Muni_cover_letter.pdf`
+    )
+  );
 }
 
 export async function generateLetter(values: Values) {
-  const fileId = await duplicateMaster(
-    values.company.toLowerCase().replaceAll(" ", "_")
-  );
+  const fileId = await duplicateMaster(values.company.replaceAll(" ", "_"));
 
   const reponse = await fetch(
     `https://docs.googleapis.com/v1/documents/${fileId.id}:batchUpdate`,
@@ -255,5 +260,5 @@ export async function generateLetter(values: Values) {
       }),
     }
   );
-  await downloadAsPdf(fileId);
+  await downloadAsPdf(fileId, values.company.replaceAll(" ", "_"));
 }
