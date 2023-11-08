@@ -7,6 +7,7 @@ import {
   showHUD,
   PopToRootType,
 } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import * as google from "./google";
 import { useEffect, useState } from "react";
 
@@ -133,7 +134,4 @@ export default function Command() {
     //   })}
     // </List>
   );
-}
-function runAppleScript(arg0: string) {
-  throw new Error("Function not implemented.");
 }

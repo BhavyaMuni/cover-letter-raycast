@@ -82,12 +82,12 @@ async function refreshTokens(
 
 export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   const params = new URLSearchParams();
-  params.append("q", "name = 'cover_letter_bhavya_muni_'");
+  params.append("q", "name contains '_Bhavya_Muni_cover_letter'");
 
   params.append("fields", "files(id, name)");
 
   params.append("orderBy", "recency desc");
-  params.append("pageSize", "1");
+  params.append("pageSize", "100");
   const response = await fetch(
     "https://www.googleapis.com/drive/v3/files?" + params.toString(),
     {
