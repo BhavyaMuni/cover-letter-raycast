@@ -20,13 +20,12 @@ export type Values = {
 };
 
 export default function Command() {
-  const service = google;
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
       try {
-        await service.authorize();
+        await google.authorize();
         setIsLoading(false);
       } catch (error) {
         console.error(error);
@@ -34,12 +33,12 @@ export default function Command() {
         showToast({ style: Toast.Style.Failure, title: String(error) });
       }
     })();
-  }, [service]);
+  }, [google]);
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     showToast({ style: Toast.Style.Animated, title: "Generating..." });
-    await service.generateLetter(values);
+    await google.generateLetter(values);
     showToast({ style: Toast.Style.Success, title: "✅" });
     setIsLoading(false);
     await runAppleScript(`

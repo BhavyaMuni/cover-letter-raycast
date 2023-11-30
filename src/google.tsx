@@ -28,10 +28,11 @@ export async function authorize(): Promise<void> {
   }
 
   const authRequest = await client.authorizationRequest({
-    endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    endpoint:
+      "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline",
     clientId: clientId,
     scope:
-      "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/docs",
+      "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/docs",
   });
   const { authorizationCode } = await client.authorize(authRequest);
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));
