@@ -66,6 +66,7 @@ async function refreshTokens(
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
+  //   params.append("client_secret", clientSecret);
   params.append("refresh_token", refreshToken);
   params.append("grant_type", "refresh_token");
 

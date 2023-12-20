@@ -63,7 +63,7 @@ export default function Command() {
     >
       <Form.TextField id="company" title="Company" defaultValue="" />
 
-      <Form.Dropdown id="position" title="Position">
+      <Form.Dropdown id="position" title="Position" filtering={true}>
         <Form.Dropdown.Item
           value="Software Developer Intern"
           title="Software Developer Intern"
