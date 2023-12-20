@@ -6,10 +6,14 @@ import {
   Toast,
   showHUD,
   PopToRootType,
+  List,
+  useNavigation,
 } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import * as google from "./google";
 import { useEffect, useState } from "react";
+import fs from "fs";
+import { homedir } from "os";
 
 export type Values = {
   position: string;
@@ -19,8 +23,47 @@ export type Values = {
   field: string;
 };
 
+const testFolder = `${homedir()}/Documents/CoOp`;
+const fileList = fs
+  .readdirSync(testFolder)
+  .filter((file) => file.includes("_Bhavya_Muni_cover_letter.pdf"));
 export default function Command() {
+  const { push } = useNavigation();
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, filterList] = useState(fileList);
+
+  useEffect(() => {
+    filterList(fileList.filter((file) => file.includes(searchText)));
+  }, [searchText]);
+
+  return (
+    <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      navigationTitle="Cover Letters"
+      searchBarPlaceholder="Search past cover letters"
+    >
+      {filteredList.map((file) => (
+        <List.Item
+          key={file}
+          title={file}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Create New..."
+                onAction={() => push(<CreateLetterForm />)}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+
+export function CreateLetterForm() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { pop } = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -44,7 +87,7 @@ export default function Command() {
     await runAppleScript(`
     tell application "Finder"
         activate
-        open ("/Users/bhavya/Documents/CoOp/" as POSIX file)
+        open ("${homedir()}/Documents/CoOp/" as POSIX file)
     end tell`);
     await showHUD("Done ✅", {
       clearRootSearch: true,
@@ -57,6 +100,11 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action
+            title="Cancel"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+            onAction={() => pop()}
+          />
         </ActionPanel>
       }
       isLoading={isLoading}
@@ -116,21 +164,5 @@ export default function Command() {
 
       <Form.TextField id="field" title="Field" defaultValue="" />
     </Form>
-    // <List isLoading={isLoading}>
-    //   {items.map((item) => {
-    //     return (
-    //       <List.Item
-    //         key={item.id}
-    //         id={item.id}
-    //         title={item.title}
-    //         actions={
-    //           <ActionPanel>
-    //             <GenerateLetterAction onSubmit={handleSubmit} />
-    //           </ActionPanel>
-    //         }
-    //       />
-    //     );
-    //   })}
-    // </List>
   );
 }
