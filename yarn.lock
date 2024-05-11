@@ -107,10 +107,10 @@
     "@typescript-eslint/utils" "^5.48.1"
     title-case "^3.0.3"
 
-"@raycast/utils@^1.10.1":
-  version "1.10.1"
-  resolved "https://registry.yarnpkg.com/@raycast/utils/-/utils-1.10.1.tgz#f00755544952d6b59a9f330484a17f9c1fdb3852"
-  integrity sha512-XvSTbbNSNE3ioLm0OIHpdy6484vg464Siz+AZVnpsjkma36+mej54NIoC6wyqTJeituJR5qWxRGmNXn47M6p4Q==
+"@raycast/utils@^1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@raycast/utils/-/utils-1.15.0.tgz#7c727d4f3feb05b43c97e3b755c3bd1f7cfddc17"
+  integrity sha512-fVHT+9S0EotXGlWH779wSZMpGHGc13kSpA/m5CBUwkd1MRtWWbSuMs5ObJ46KRBAAYJQBSnm4eDck935WtUONQ==
   dependencies:
     content-type "^1.0.5"
     cross-fetch "^3.1.6"
@@ -118,6 +118,8 @@
     media-typer "^1.1.0"
     object-hash "^3.0.0"
     signal-exit "^4.0.2"
+    stream-chain "^2.2.5"
+    stream-json "^1.8.0"
 
 "@rushstack/eslint-patch@^1.5.1":
   version "1.5.1"
@@ -1054,6 +1056,18 @@ slash@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/slash/-/slash-3.0.0.tgz#6539be870c165adbd5240220dbe361f1bc4d4634"
   integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
+
+stream-chain@^2.2.5:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/stream-chain/-/stream-chain-2.2.5.tgz#b30967e8f14ee033c5b9a19bbe8a2cba90ba0d09"
+  integrity sha512-1TJmBx6aSWqZ4tx7aTpBDXK0/e2hhcNSTV8+CbFJtDjbb+I1mZ8lHit0Grw9GRT+6JbIrrDd8esncgBi8aBXGA==
+
+stream-json@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/stream-json/-/stream-json-1.8.0.tgz#53f486b2e3b4496c506131f8d7260ba42def151c"
+  integrity sha512-HZfXngYHUAr1exT4fxlbc1IOce1RYxp2ldeaf97LYCOPSoOqY/1Psp7iGvpb+6JIOgkra9zDYnPX01hGAHzEPw==
+  dependencies:
+    stream-chain "^2.2.5"
 
 strip-ansi@^6.0.1:
   version "6.0.1"

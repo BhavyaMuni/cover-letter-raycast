@@ -1,87 +1,7 @@
-import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
-import { Values } from "./index";
+import { Values } from "./form";
 import fs from "fs";
-
-// Create an OAuth client ID via https://console.developers.google.com/apis/credentials
-// As application type choose "iOS" (required for PKCE)
-// As Bundle ID enter: com.raycast
-const clientId =
-  "1038477001981-f8k6n1rqom4q37m0o7qmldvoh6sje23j.apps.googleusercontent.com";
-
-const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.AppURI,
-  providerName: "Google",
-  providerIcon: "google-logo.png",
-  providerId: "google",
-  description: "Connect your Google account\n(Raycast Extension Demo)",
-});
-
-// Authorization
-export async function authorize(): Promise<void> {
-  const tokenSet = await client.getTokens();
-  if (tokenSet?.accessToken) {
-    if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
-    }
-    return;
-  }
-
-  const authRequest = await client.authorizationRequest({
-    endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-    clientId: clientId,
-    scope:
-      "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/docs",
-    extraParameters: { access_type: "offline" },
-  });
-
-  const { authorizationCode } = await client.authorize(authRequest);
-  await client.setTokens(await fetchTokens(authRequest, authorizationCode));
-}
-
-async function fetchTokens(
-  authRequest: OAuth.AuthorizationRequest,
-  authCode: string
-): Promise<OAuth.TokenResponse> {
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("code", authCode);
-  params.append("verifier", authRequest.codeVerifier);
-  params.append("grant_type", "authorization_code");
-  params.append("redirect_uri", authRequest.redirectURI);
-
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    body: params,
-  });
-  if (!response.ok) {
-    console.error("fetch tokens error:", await response.text());
-    throw new Error(response.statusText);
-  }
-  return (await response.json()) as OAuth.TokenResponse;
-}
-
-async function refreshTokens(
-  refreshToken: string
-): Promise<OAuth.TokenResponse> {
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  //   params.append("client_secret", clientSecret);
-  params.append("refresh_token", refreshToken);
-  params.append("grant_type", "refresh_token");
-
-  const response = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    body: params,
-  });
-  if (!response.ok) {
-    console.error("refresh tokens error:", await response.text());
-    throw new Error(response.statusText);
-  }
-  const tokenResponse = (await response.json()) as OAuth.TokenResponse;
-  tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
-  return tokenResponse;
-}
+import { getAccessToken } from "@raycast/utils";
 
 export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   const params = new URLSearchParams();
@@ -96,9 +16,9 @@ export async function fetchItems(): Promise<{ id: string; title: string }[]> {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+        Authorization: `Bearer ${getAccessToken().token}`,
       },
-    }
+    },
   );
   if (!response.ok) {
     console.error("fetch items error:", await response.text());
@@ -108,10 +28,6 @@ export async function fetchItems(): Promise<{ id: string; title: string }[]> {
     files: { id: string; name: string }[];
   };
   return json.files.map((item) => ({ id: item.id, title: item.name }));
-}
-
-export async function removeTokens(): Promise<void> {
-  await client.removeTokens();
 }
 
 async function getMasterId(): Promise<string> {
@@ -127,9 +43,9 @@ async function getMasterId(): Promise<string> {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+        Authorization: `Bearer ${getAccessToken().token}`,
       },
-    }
+    },
   );
 
   const json = (await response.json()) as {
@@ -147,12 +63,12 @@ async function duplicateMaster(cname?: string) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+        Authorization: `Bearer ${getAccessToken().token}`,
       },
       body: JSON.stringify({
         name: cname + "_Bhavya_Muni_cover_letter",
       }),
-    }
+    },
   );
   const json = (await response.json()) as { id: string; name: string };
   return json;
@@ -168,7 +84,7 @@ const formatQualities = (qs: string[]): string => {
 
 async function downloadAsPdf(
   fileId: { id: string; name: string },
-  cname?: string
+  cname?: string,
 ) {
   // download file id as pdf
   const response = await fetch(
@@ -177,27 +93,29 @@ async function downloadAsPdf(
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+        Authorization: `Bearer ${getAccessToken().token}`,
       },
-    }
+    },
   );
   response.body?.pipe(
     fs.createWriteStream(
-      `/Users/bhavya/Documents/CoOp/${cname ?? ""}_Bhavya_Muni_cover_letter.pdf`
-    )
+      `/Users/bhavya/Documents/CoOp/${
+        cname ?? ""
+      }_Bhavya_Muni_cover_letter.pdf`,
+    ),
   );
 }
 
 export async function generateLetter(values: Values) {
   const fileId = await duplicateMaster(values.company.replaceAll(" ", "_"));
 
-  const reponse = await fetch(
+  await fetch(
     `https://docs.googleapis.com/v1/documents/${fileId.id}:batchUpdate`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+        Authorization: `Bearer ${getAccessToken().token}`,
       },
       body: JSON.stringify({
         requests: [
@@ -261,7 +179,7 @@ export async function generateLetter(values: Values) {
           },
         ],
       }),
-    }
+    },
   );
   await downloadAsPdf(fileId, values.company.replaceAll(" ", "_"));
 }
