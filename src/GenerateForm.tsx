@@ -21,7 +21,7 @@ export type Values = {
   field: string;
 };
 
-export function CreateLetterForm() {
+export function GenerateForm() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { pop } = useNavigation();
 

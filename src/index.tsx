@@ -4,7 +4,7 @@ import fs from "fs";
 import { homedir } from "os";
 import { useEffect, useState } from "react";
 import { auth } from "./oauth";
-import { CreateLetterForm } from "./form";
+import { GenerateForm } from "./GenerateForm";
 
 const testFolder = `${homedir()}/Documents/CoOp`;
 const fileList = fs
@@ -29,7 +29,7 @@ function Command() {
         <ActionPanel>
           <Action
             title="Create New..."
-            onAction={() => push(<CreateLetterForm />)}
+            onAction={() => push(<GenerateForm />)}
           />
         </ActionPanel>
       }

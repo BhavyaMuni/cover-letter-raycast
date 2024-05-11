@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
-import { Values } from "./form";
 import fs from "fs";
 import { getAccessToken } from "@raycast/utils";
+import { Values } from "./GenerateForm";
 
 export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   const params = new URLSearchParams();
