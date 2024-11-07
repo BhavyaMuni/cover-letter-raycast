@@ -22,7 +22,7 @@ export type Values = {
 };
 
 export function GenerateForm() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pop } = useNavigation();
 
   async function handleSubmit(values: Values) {
@@ -58,24 +58,7 @@ export function GenerateForm() {
     >
       <Form.TextField id="company" title="Company" defaultValue="" />
 
-      <Form.Dropdown id="position" title="Position" filtering={true}>
-        <Form.Dropdown.Item
-          value="Software Developer Intern"
-          title="Software Developer Intern"
-        />
-        <Form.Dropdown.Item
-          value="Software Developer Co-Op"
-          title="Software Developer Co-Op"
-        />
-        <Form.Dropdown.Item
-          value="Software Engineer Intern"
-          title="Software Engineer Intern"
-        />
-        <Form.Dropdown.Item
-          value="Software Engineer Co-Op"
-          title="Software Engineer Co-Op"
-        />
-      </Form.Dropdown>
+      <Form.TextField id="position" title="Position" defaultValue="" />
 
       <Form.TagPicker id="quality" title="Qualities">
         <Form.TagPicker.Item
@@ -87,10 +70,7 @@ export function GenerateForm() {
           title="fast-paced environment"
         />
         <Form.TagPicker.Item value="impactful work" title="impactful work" />
-        <Form.TagPicker.Item
-          value="passtionate team"
-          title="passtionate team"
-        />
+        <Form.TagPicker.Item value="passionate team" title="passionate team" />
         <Form.TagPicker.Item
           value="creative freedom"
           title="creative freedom"

@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import fs from "fs";
-import { getAccessToken } from "@raycast/utils";
-import { Values } from "./GenerateForm";
+import { type Values } from "./GenerateForm";
+import { client } from "./oauth";
 
 export async function fetchItems(): Promise<{ id: string; title: string }[]> {
   const params = new URLSearchParams();
@@ -16,9 +16,9 @@ export async function fetchItems(): Promise<{ id: string; title: string }[]> {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getAccessToken().token}`,
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
-    },
+    }
   );
   if (!response.ok) {
     console.error("fetch items error:", await response.text());
@@ -43,9 +43,9 @@ async function getMasterId(): Promise<string> {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getAccessToken().token}`,
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
-    },
+    }
   );
 
   const json = (await response.json()) as {
@@ -63,12 +63,12 @@ async function duplicateMaster(cname?: string) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getAccessToken().token}`,
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
       body: JSON.stringify({
         name: cname + "_Bhavya_Muni_cover_letter",
       }),
-    },
+    }
   );
   const json = (await response.json()) as { id: string; name: string };
   return json;
@@ -84,7 +84,7 @@ const formatQualities = (qs: string[]): string => {
 
 async function downloadAsPdf(
   fileId: { id: string; name: string },
-  cname?: string,
+  cname?: string
 ) {
   // download file id as pdf
   const response = await fetch(
@@ -93,16 +93,14 @@ async function downloadAsPdf(
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${getAccessToken().token}`,
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
-    },
+    }
   );
   response.body?.pipe(
     fs.createWriteStream(
-      `/Users/bhavya/Documents/CoOp/${
-        cname ?? ""
-      }_Bhavya_Muni_cover_letter.pdf`,
-    ),
+      `/Users/bhavya/Documents/CoOp/${cname ?? ""}_Bhavya_Muni_cover_letter.pdf`
+    )
   );
 }
 
@@ -115,7 +113,7 @@ export async function generateLetter(values: Values) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getAccessToken().token}`,
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
       },
       body: JSON.stringify({
         requests: [
@@ -179,7 +177,7 @@ export async function generateLetter(values: Values) {
           },
         ],
       }),
-    },
+    }
   );
   await downloadAsPdf(fileId, values.company.replaceAll(" ", "_"));
 }
